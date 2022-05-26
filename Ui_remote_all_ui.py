@@ -119,7 +119,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer_12)
 
-        self.horizontalLayout_5.setStretch(0, 114)
+        self.horizontalLayout_5.setStretch(0, 100)
         self.horizontalLayout_5.setStretch(1, 100)
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_5)
@@ -146,7 +146,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_6.addItem(self.horizontalSpacer_10)
 
-        self.horizontalLayout_6.setStretch(0, 114)
+        self.horizontalLayout_6.setStretch(0, 100)
         self.horizontalLayout_6.setStretch(1, 100)
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_6)
@@ -173,7 +173,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_7.addItem(self.horizontalSpacer_8)
 
-        self.horizontalLayout_7.setStretch(0, 114)
+        self.horizontalLayout_7.setStretch(0, 100)
         self.horizontalLayout_7.setStretch(1, 100)
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_7)
@@ -207,53 +207,26 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer_3)
 
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_8 = QVBoxLayout()
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.verticalSpacer_6 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_6)
+        self.verticalLayout_8.addItem(self.verticalSpacer_6)
+
+        self.verticalLayout_map = QVBoxLayout()
+        self.verticalLayout_map.setObjectName(u"verticalLayout_map")
+
+        self.verticalLayout_8.addLayout(self.verticalLayout_map)
 
         self.verticalSpacer_7 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer_7)
+        self.verticalLayout_8.addItem(self.verticalSpacer_7)
 
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.pushButton_update = QPushButton(self.centralwidget)
-        self.pushButton_update.setObjectName(u"pushButton_update")
-        self.pushButton_update.setMinimumSize(QSize(80, 50))
-        font = QFont()
-        font.setFamily(u"\u5e7c\u5706")
-        font.setPointSize(15)
-        font.setBold(False)
-        font.setItalic(False)
-        font.setWeight(50)
-        self.pushButton_update.setFont(font)
-        self.pushButton_update.setStyleSheet(u"QPushButton{\n"
-"	border-image:transparent;\n"
-"}")
+        self.verticalLayout_8.setStretch(0, 1)
+        self.verticalLayout_8.setStretch(1, 50)
+        self.verticalLayout_8.setStretch(2, 1)
 
-        self.horizontalLayout_4.addWidget(self.pushButton_update)
-
-        self.pushButton_cancel = QPushButton(self.centralwidget)
-        self.pushButton_cancel.setObjectName(u"pushButton_cancel")
-        self.pushButton_cancel.setMinimumSize(QSize(80, 50))
-        self.pushButton_cancel.setFont(font)
-        self.pushButton_cancel.setStyleSheet(u"QPushButton{\n"
-"	border-image:transparent;\n"
-"}")
-
-        self.horizontalLayout_4.addWidget(self.pushButton_cancel)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_4)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_4)
-
-
-        self.horizontalLayout_2.addLayout(self.verticalLayout_2)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_8)
 
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
@@ -423,9 +396,9 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.setStretch(0, 5)
         self.horizontalLayout_2.setStretch(1, 75)
-        self.horizontalLayout_2.setStretch(2, 40)
-        self.horizontalLayout_2.setStretch(3, 10)
-        self.horizontalLayout_2.setStretch(4, 35)
+        self.horizontalLayout_2.setStretch(2, 5)
+        self.horizontalLayout_2.setStretch(3, 100)
+        self.horizontalLayout_2.setStretch(4, 5)
         self.horizontalLayout_2.setStretch(5, 70)
         self.horizontalLayout_2.setStretch(6, 5)
 
@@ -453,8 +426,6 @@ class Ui_MainWindow(object):
         self.label_online.setText(QCoreApplication.translate("MainWindow", u"1", None))
         self.label_damage.setText(QCoreApplication.translate("MainWindow", u"75", None))
         self.label_workingtime.setText(QCoreApplication.translate("MainWindow", u"1", None))
-        self.pushButton_update.setText(QCoreApplication.translate("MainWindow", u"\u66f4\u65b0", None))
-        self.pushButton_cancel.setText(QCoreApplication.translate("MainWindow", u"\u9000\u51fa", None))
         self.label_onworking.setText(QCoreApplication.translate("MainWindow", u"1", None))
         self.label_notworking.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.label_offline.setText(QCoreApplication.translate("MainWindow", u"4", None))

@@ -27,7 +27,15 @@ import pymysql
  * 2021-11-19 
  * 2021-11-27 新指令，getDamage,all
  * 2022-3-21 指令总结如下：
- *                      get,navtable：获取当前的所有设备，在线的，离线的，损伤数，地址 
+ *                      get,navtable：获取当前的所有设备，在线的，离线的，损伤数，地址
+ * 2022-5-23 使用json替代字符串指令做数据传输和通信：
+ *                       {
+ *                        "mod":"local",
+                          "name":"实验室",
+                          "base":"武汉",
+                          "damageNum":0,
+                          "flag_cloud_uploading":0
+ *                       } 
  * ****************************************************************************************
 **/
 '''
@@ -38,6 +46,9 @@ g_conn_pool = []  # 连接池，主要用于获取当前在线的socket，但是
 g_navTable = {} #全局导航字典 "name"->"data"
 g_damageStats = {
 }#全局损伤统计字典 "baseNme"->"number"
+g_flagUploadMode = {}#上传损伤数还是原始数据 "baseNme"->"flag"
+g_MaxBytes=1024*1024
+g_picBuff = Queue(maxsize=40)
 '''
 /*
  * @brief 初始化服务器socket函数
@@ -52,9 +63,11 @@ def init():#主函数首先调用
     global g_socket_server
     global g_ADDRESS
     g_socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 创建 socket 对象
+    g_socket_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     g_socket_server.bind(g_ADDRESS)
     g_socket_server.listen(10)  # 最大等待数（有很多人理解为最大连接数，其实是错误的）
     print("服务端已启动，等待客户端连接...")
+'''the end of init'''
 '''
 /*
  * @brief 服务器socket循环接受新来的socket连接
@@ -76,6 +89,7 @@ def accept_client():#子线程循环执行这个
         thread.setDaemon(True)
         thread.start()
         print("一个用户上线了.......")
+'''the end of accept_client'''
 '''
 /*
  * @brief 服务器socket接受新socket连接后,处理消息，主要包括：判断模式，循环处理直至断开连接
@@ -87,73 +101,41 @@ def message_handle(client):
     '''
     消息处理
     '''
+    count_navTable()
     print("等待客户端消息")
     #client.sendall("连接服务器成功!".encode(encoding='utf8'))
     while True:
-        bytess = client.recv(1280)
-        print("客户端消息:", bytess.decode(encoding='utf8'))
-        bytesStr = str(bytess,encoding = "utf-8")
-        '''
-        * handle message "get,navtable"
-        '''
-        if bytesStr == "get,navtable":
-            sendStr = count_navTable()
-            print(sendStr)
-            data = json.dumps(sendStr)
-            client.sendall(bytes(data.encode('utf-8')))
-        '''
-        * handle message "getDamage,all" ps:这个指令已经被废弃,get,navtable包括其所有的功能
-        '''
-        if bytesStr == "getDamage,all":
-            if g_damageStats == {}:
-                client.sendall("null".encode())
-                client.close()
-            else:
-                retStr = ''
-                for k,v in dic.items():
-                    retStr = retStr + k + "," + str(v) + ","
-                client.sendall(retStr.encode())
-                client.close()
-        '''
-        * 切分,分割的指令
-        '''        
-        progMode,baseName = bytesStr.split(",")
-        '''
-        * handle message "send,baseName"
-        '''
-        if progMode =="send":
-            print("客户端消息上传模式")
-            client.send('GetDamageData'.encode('utf-8'))
-            client_send_handle_func(client,"send",baseName)
+        bytess = client.recv(g_MaxBytes)
+        str = bytess.decode()
+        if len(str) == 0:
+            print("line 110:断开连接！")
             g_conn_pool.remove(client)
-            print("有一个客户端下线了。")
             break
-        '''
-        * handle message "get,baseName"
-        '''
-        if progMode =="get":
-            print("客户端下载模式")
-            client_get_handle_func(client,"get",baseName)
-            g_conn_pool.remove(client)
-            print("有一个客户端下线了。")
-            break
-        '''
-        * handle message "sendDamage,baseName.<damageNum>"
-        '''
-        if progMode =="sendDamage":
-            print("客户端上传损伤")
-            realBaseName,strSecond = baseName.split(".")
-            if realBaseName in g_damageStats.keys():
-                g_damageStats[realBaseName] = g_damageStats[realBaseName]+1
-            else:
-                g_damageStats[realBaseName] = 1
-            break
-        if len(bytess) == 0:
+        try:
+            json_data = json.loads(bytess)
+            baseName = json_data["name"]
+            base = json_data["base"]
+            damageNum = json_data["damageNum"]
+            if(json_data["mod"] == "local"):############################本地模式连接######################
+                if baseName in g_damageStats.keys():
+                    insertEquipment(baseName,base,g_damageStats[baseName][2]+int(damageNum),0)
+                    g_damageStats[baseName][2] = g_damageStats[baseName][2]+int(damageNum)
+                else:
+                    insertEquipment(baseName,base,int(damageNum),0)
+                    count_navTable()
+                print("line 125:"+str)
+            elif (json_data["mod"] == "remote"):########################本地模式连接######################
+                print(json_data["mod"])
+                sendStr = count_navTable()
+                data = json.dumps(sendStr)
+                client.sendall(bytes(data.encode('utf-8')))
+        except:
             client.close()
-            # 删除连接
+            print("connected error")
             g_conn_pool.remove(client)
-            print("有一个客户端下线了。")
             break
+
+'''the end of message_handle'''
 '''
 /*
  * @brief 发送"send"数据模式
@@ -168,7 +150,8 @@ def client_send_handle_func(client,send_flag,baseName):#先发send进入此模�
             time.sleep(0.002)#很重要不要删，时间匹配防止出现粘包问题
             try:
                 bytess = client.recv(1280)
-                bytessLen = len(bytess) 
+                bytessLen = len(bytess)
+                print("接收数据长度") 
                 print(bytessLen)
             except:
                 print("--------------------------")
@@ -190,6 +173,7 @@ def client_send_handle_func(client,send_flag,baseName):#先发send进入此模�
                 try:
                     bytesStr = str(bytess,encoding = "utf-8")
                     progMode,strSecond = bytesStr.split(",")
+                    print(strSecond)
                     if progMode =="sendDamage":
                         print("客户端上传损伤")
                         baseName,damageNum = strSecond.split(".")
@@ -203,6 +187,7 @@ def client_send_handle_func(client,send_flag,baseName):#先发send进入此模�
                     pass
             elif bytessLen >= 1280:
                 g_navTable[baseName].put(bytess)
+'''the end of message_handle client_send_handle_func'''
 '''
 /*
  * @brief 获取"get"数据模式，循环处理
@@ -260,6 +245,7 @@ def client_get_handle_func(client,get_flag,baseName):#先发get进入此模式
                         print("--------------------------")
                         client.close()
                         break
+'''the end of message_handle client_get_handle_func'''
 '''
 /*
  * @brief 查询所有在线的监测点
@@ -287,13 +273,15 @@ def count_navTable():
         while result!=None:
             equipmentRes = list(result)
             g_damageStats[equipmentRes[0]] = equipmentRes
+            g_flagUploadMode[equipmentRes[0]] = 1
             result = cursor.fetchone()
-        print(g_damageStats)
+        print("line 274:"+"count_navTable:")
+        print("line 275:"+str(g_damageStats))
         conn.commit()
         cursor.close()
         conn.close()
     except:
-        pass
+        print("sql error")
     return g_damageStats
 '''the end of count_navTable'''
 
@@ -320,6 +308,9 @@ def insertEquipment(name,base,damageNum,onLineState):
         mysql_sql = "update baseInfo set base = '{}',damageNum = {},onLineState = {} where name = '{}';".format(base,str(damageNum),str(onLineState),name)
         print(mysql_sql)
         cursor.execute(mysql_sql)
+        conn.commit()
+        cursor.close()
+        conn.close()
 '''the end of insertEquipment'''
 
 if __name__ == '__main__':

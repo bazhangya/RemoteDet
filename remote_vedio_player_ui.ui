@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	background:rgb(250,259,240);
+}
+QTextEdit{
+	color:rgb(255,255,255);
+	font: 12pt &quot;幼圆&quot;;
+
+}
+QPushButton{
+    color:white;
+	font: 15pt &quot;幼圆&quot;;
+	border-color:(255,255,255);
+	border-width:1px;
+	border-style:outset;
+	border-radius:5px;
+}
+QPushButton:disabled {
+	color:red;
+	font: 15pt &quot;幼圆&quot;;
+	border-color:(255,255,255);
+	border-width:1px;
+	border-style:outset;
+	border-radius:5px;
+}
+QPushButton:pressed{
+    color:white;
+	font: 17pt &quot;幼圆&quot;;	
+	border-style:inset;
+	border-width:2px;
+	border-radius:5px;
+}
+QLabel {
+	color:rgb(255,255,255);
+	font: 22pt &quot;幼圆&quot;;
+}
+</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="10,100">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_vedio_report">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>回放</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_vedio_quit">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>退出</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

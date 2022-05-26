@@ -8,6 +8,8 @@ import os
 import numpy
 import numpy as np
 import PySide2
+from PySide2.QtCore import QTimer
+from PySide2.QtCore import QUrl
 import pyqtgraph
 import sys
 import random
@@ -18,6 +20,7 @@ import Ui_remote_main_ui
 import Ui_remote_all_ui
 import Ui_remote_applicantion_set_ui
 import Ui_remote_sign_ui
+import Ui_remote_vedio_player_ui
 import docx
 from queue import Queue,LifoQueue,PriorityQueue
 #from PySide2.QtWidgets import QWidget, QPushButton, QApplication, QMessageBox, QGridLayout
@@ -31,8 +34,20 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import json
 import pymysql
+
+from PySide2 import QtWidgets, QtCore, QtGui, QtWebEngineWidgets
+from PySide2.QtWebEngine import QtWebEngine
+from PySide2.QtWidgets import QApplication
+from PySide2.QtWebEngineWidgets import *
+
+from PySide2.QtMultimedia import QMediaPlayer, QMediaPlaylist
+from PySide2.QtMultimediaWidgets import QVideoWidget
 # 将全局的字体设置为黑体
 plt.rcParams['font.family'] = 'SimHei'
+g_MaxBytes=1024*1024
+QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
+QtWebEngine.initialize()
 '''
 /*
  * ***************************************************************************************
@@ -78,8 +93,7 @@ class main_application_obj():
         self.user_widget_init()
         self.signal_slot_init()
         self.graph_init()
-        self.getNavTable()
-        
+        self.getNavTable()    
     '''
     /*
     * @brief 初始化存储数据的文件夹，构造函数中调用了一次
@@ -107,6 +121,7 @@ class main_application_obj():
         self.all_window = PySide2.QtWidgets.QMainWindow()
         self.set_window = PySide2.QtWidgets.QMainWindow()
         self.sign_widget = PySide2.QtWidgets.QWidget()
+        self.video_widget = PySide2.QtWidgets.QWidget()
         ######ui对象
         self.main_ui = Ui_remote_main_ui.Ui_MainWindow()
         self.main_ui.setupUi(self.main_window)
@@ -116,7 +131,11 @@ class main_application_obj():
         self.set_ui.setupUi(self.set_window)
         self.sign_ui = Ui_remote_sign_ui.Ui_Form()
         self.sign_ui.setupUi(self.sign_widget)
+        self.video_ui = Ui_remote_vedio_player_ui.Ui_Form()
+        self.video_ui.setupUi(self.video_widget)
+        self.sign_widget.showMaximized()
         self.sign_widget.show()
+        
         #self.sign_widget.setFixedSize(self.sign_widget.width(), self.sign_widget.height())
         #self.all_window.setFixedSize(self.all_window.width(), self.all_window.height())
         #self.main_window.setFixedSize(self.main_window.width(), self.main_window.height())
@@ -135,15 +154,18 @@ class main_application_obj():
         self.main_ui.bn_back.clicked.connect(self.bn_slot_back)
         self.main_ui.bn_set.clicked.connect(self.bn_slot_set)
         self.main_ui.bn_quit.clicked.connect(self.bn_slot_drop)
-        self.all_ui.pushButton_update.clicked.connect(self.bn_slot_update)
-        self.all_ui.pushButton_cancel.clicked.connect(self.bn_slot_sign_cancel)
+        #self.all_ui.pushButton_update.clicked.connect(self.bn_slot_update)
+        #self.all_ui.pushButton_cancel.clicked.connect(self.bn_slot_sign_cancel) itemDoubleClicked
         self.all_ui.listWidget_summary.itemClicked.connect(self.listwidget_slot_signin_itemchoose)
+        self.all_ui.listWidget_summary.itemDoubleClicked.connect(self.listwidget_slot_all_itemDoubleClicked)
         self.set_ui.pushButton_set_save.clicked.connect(self.bn_slot_set_save)
         self.set_ui.pushButton_set_cancel.clicked.connect(self.bn_slot_set_cancel)
         self.set_ui.pushButton_set_signin.clicked.connect(self.bn_slot_set_signin)
         self.set_ui.comboBox_set_servechose.currentIndexChanged.connect(self.cb_slot_set_servechoose)
         self.sign_ui.pushButton_sign.clicked.connect(self.bn_slot_sign_sign)
         self.sign_ui.pushButton_quit.clicked.connect(self.bn_slot_sign_quit)
+        self.video_ui.pushButton_vedio_quit.clicked.connect(self.bn_slot_vedio_quit)
+        self.video_ui.pushButton_vedio_report.clicked.connect(self.bn_slot_vedio_report)
         
     '''
     /*
@@ -222,6 +244,27 @@ class main_application_obj():
         self.hal_curve2.setData(self.graph_hal_plot_data2)
         self.hal_curve2.setPos(self.graph_hal_plot_pos2, 0)
 
+        #播放视频
+        self.videoWidget = QVideoWidget()
+        self.mediaPlayer = QMediaPlayer()
+        #self.mediaPlaylist = QMediaPlaylist()
+        # Add the video file path   
+        #self.mediaPlaylist.addMedia(QUrl.fromLocalFile(os.path.abspath("D:/系统默认/IDM下载/MediaPlayer-master/sample_data/sampleVideo.mp4")))
+        # Set the video to played in a loop once it ends.
+        #self.mediaPlaylist.setPlaybackMode(QMediaPlaylist.CurrentItemInLoop)
+        # Set the QMediaPlaylist for the QMediaPlayer.
+        #self.mediaPlayer.setPlaylist(self.mediaPlaylist)
+        # Add the QVideoWidget in the GridLayout.
+        self.video_ui.verticalLayout.addWidget(self.videoWidget)
+        #self.playerLayout.addWidget(self.videoWidget)
+        # Set the video output from the QMediaPlayer to the QVideoWidget.
+        self.mediaPlayer.setVideoOutput(self.videoWidget)
+        # Set the QPushButtons to play, pause and stop the video in the QVideoWidget.
+        #地图
+        self.view = QWebEngineView()
+        #self.all_ui.verticalLayout_map.addWidget(self.view)
+        #self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/main.html")))
+        #self.view.show()
         #主界面的图形更新，柱状图
         self.sc = MplCanvas(self,facecolor = '#0a2461')
         '''
@@ -309,10 +352,14 @@ class main_application_obj():
         self.graph_hal_sub_data2 = 0
         self.graph_sub_data_run_once_flag = 1
         self.graph_update_timer = pyqtgraph.QtCore.QTimer()
+        self.QTimer_Graph_Update = QTimer()
         self.internet_flag = 0
         self.g_damageStats = {'设备1': ['设备1', '武汉', 15, 0], '设备2': ['设备2', '武汉', 20, 1], '设备3': ['设备3', '武汉', 5, 0], '设备4': ['设备4', '武汉', 5, 0]}
+        self.json_command = {"mod":"remote","name":"all","base":"武汉","damageNum":0,"flag_cloud_uploading":0}
         self.sc = 0
         self.graphCake = 0
+        self.flag_vedio_widget = 0
+        self.startTime = time.time()
     '''
     /*
     * @brief 获取所有的监测点名字,
@@ -325,8 +372,9 @@ class main_application_obj():
             self.internet_tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # 2. 链接服务器
             self.internet_tcp_socket.connect(("118.178.187.119", 8889))
-            self.internet_tcp_socket.sendall("get,navtable".encode())
-            navtable = self.internet_tcp_socket.recv(1280)
+            sendStr = json.dumps(self.json_command)
+            self.internet_tcp_socket.sendall(sendStr.encode('utf-8'))
+            navtable = self.internet_tcp_socket.recv(g_MaxBytes)
             self.internet_tcp_socket.close()
             self.g_damageStats = json.loads(navtable.decode('utf-8'))
             #print(self.g_damageStats)
@@ -342,7 +390,7 @@ class main_application_obj():
                     self.all_ui.listWidget_base.addItem(self.g_damageStats[key][1])
                     self.all_ui.listWidget_num.addItem(str(self.g_damageStats[key][2]))               
         except:
-            self.all_ui.listWidget_summary.addItem("网络链路出错")
+            #self.all_ui.listWidget_summary.addItem("网络链路出错")
             print("get navtable网络链路出错")
     ''' 
     /*
@@ -389,6 +437,15 @@ class main_application_obj():
         print('检测')
     '''
     /*
+    * @brief 测试函数
+    * @param self
+    * @retval 无
+    */
+    '''
+    def test(self):
+        print("ceshi1")
+    '''
+    /*
     * @brief 槽函数，点击停止按钮后自动执行
     * @param self
     * @retval 无
@@ -400,6 +457,7 @@ class main_application_obj():
         self.thread_socket_flag = 0
         self.thread_defect_judge_flag = 0
         self.graph_update_timer.stop()
+        self.QTimer_Graph_Update.stop()
         print('暂停')
     '''
     /*
@@ -478,7 +536,6 @@ class main_application_obj():
     '''
     def bn_slot_sign_cancel(self):
         self.all_window.close()
-        print('离线使用')
     '''
     /*
     * @brief 按钮槽函数，点击设置页面保存按钮后自动执行
@@ -526,8 +583,11 @@ class main_application_obj():
         my_ID = self.sign_ui.lineEdit_id.text()
         my_Passwd = self.sign_ui.lineEdit_passwd.text()
         if my_ID == 'admin' and my_Passwd == 'admin':
+            self.all_window.showMaximized()
             self.sign_widget.close()
             self.all_window.show()
+            self.QTimer_Graph_Update.timeout.connect(self.bn_slot_update)
+            self.QTimer_Graph_Update.start(1000)
         else:
             PySide2.QtWidgets.QMessageBox.about(self.sign_widget, '温馨提示', '账号或密码错误，请检查后重试')
 
@@ -541,6 +601,35 @@ class main_application_obj():
     '''
     def bn_slot_sign_quit(self):
         self.sign_widget.close()
+    '''
+    /*
+    * @brief 按钮槽函数，点击按钮自动执行
+    * @param self
+    * @retval 无
+    */
+    '''
+    def bn_slot_vedio_quit(self):
+        self.mediaPlayer.stop()
+        self.video_widget.close()
+        pass
+    '''
+    /*
+    * @brief 按钮槽函数，点击按钮自动执行
+    * @param self
+    * @retval 无
+    */
+    '''
+    def bn_slot_vedio_report(self):
+        if self.flag_vedio_widget == 0:
+            self.flag_vedio_widget = 1
+            self.video_ui.pushButton_vedio_report.setText("暂停")
+            self.mediaPlayer.play()
+        else:
+            self.flag_vedio_widget = 0
+            self.video_ui.pushButton_vedio_report.setText("回放")
+            self.mediaPlayer.pause()
+
+
     '''
     /*
     * @brief coxbox槽函数，点击设置页面选择服务器按钮后自动执行
@@ -565,32 +654,69 @@ class main_application_obj():
     * @retval 无
     */
     '''
-    def listwidget_slot_signin_itemchoose(self,item):
+    def listwidget_slot_all_itemDoubleClicked(self,item):
         print(item.text())
         if item.text() == "网络链路出错":
             return
         if item.text() == "无检测设备在线！":
             return
-        sendData = "get," + item.text()
-        self.internet_tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # 2. 链接服务器
-        self.internet_tcp_socket.connect(("118.178.187.119", 8889))
-        self.internet_tcp_socket.sendall(sendData.encode())
-        ret_data = self.internet_tcp_socket.recv(1280)
-        self.internet_tcp_socket.close()
-        print(ret_data.decode())
-        if ret_data.decode() == "baseIsExis":
-            print("baseIsExis IS RECEIVED")
-            self.main_window.show()
-            self.all_window.close()
-            self.baseName = item.text()
-            self.internet_tcp_send_command = "get,"+ self.baseName
-        elif ret_data.decode() == "baseIsNotExis":
-            self.all_ui.listWidget_base.clear()
-            self.all_ui.listWidget_num.clear()
-            self.all_ui.listWidget_summary.clear()
-            self.all_ui.listWidget_summary.addItem("无检测设备在线！")
-            print("baseIsNotExis IS RECEIVED")
+        self.video_widget.showMaximized()
+        self.video_widget.show()
+        self.video_ui.pushButton_vedio_report.setEnabled(True)
+        time.sleep(0.3)
+        if item.text() == "喻远智能":
+            self.mediaPlayer.setMedia(QUrl.fromLocalFile(os.path.abspath("E:/video/0525-4.mp4")))
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+        elif item.text() == "实验室":
+            self.mediaPlayer.setMedia(QUrl.fromLocalFile(os.path.abspath("E:/video/0525-3.mp4")))
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+        elif item.text() == "手持一体":
+            self.mediaPlayer.setMedia(QUrl.fromLocalFile(os.path.abspath("E:/video/0526-1.mp4")))
+            self.video_ui.pushButton_vedio_report.setEnabled(False)
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+        elif item.text() == "维尔卡":
+            self.mediaPlayer.setMedia(QUrl.fromLocalFile(os.path.abspath("E:/video/0526-1.mp4")))
+            self.video_ui.pushButton_vedio_report.setEnabled(False)
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+        elif item.text() == "口孜东":
+            self.mediaPlayer.setMedia(QUrl.fromLocalFile(os.path.abspath("E:/video/0526-2.mp4")))
+            self.video_ui.pushButton_vedio_report.setEnabled(False)
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+        elif item.text() == "伊化矿":
+            self.mediaPlayer.setMedia(QUrl.fromLocalFile(os.path.abspath("E:/video/0525-5.mp4")))
+            self.mediaPlayer.play()
+            self.mediaPlayer.pause()
+        #self.all_window.close()
+    '''
+    /*
+    * @brief 槽函数，双击动作
+    * @param self item
+    * @retval 无
+    */
+    '''
+    def listwidget_slot_signin_itemchoose(self,item):
+        self.all_ui.verticalLayout_map.addWidget(self.view)
+        if item.text() == "实验室":
+            self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/shiyanshi.html")))
+        elif item.text() == "喻远智能":
+            self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/yuyuanzhineng.html")))
+        elif item.text() == "维尔卡":
+            self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/weierka.html")))
+        elif item.text() == "手持一体":
+            self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/yuyuanzhineng.html")))
+        elif item.text() == "口孜东":
+            self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/kouzidong.html")))
+        elif item.text() == "伊化矿":
+            self.view.load(QUrl.fromLocalFile(os.path.abspath("E:/myhtml/yihua.html")))
+        self.view.show()
+        print("signal clicked")
+        pass
+        
     def thread_tcp_commucate_get_func(self):
         while self.internet_flag:
             self.thread_socket_frequency_print += 1
@@ -707,7 +833,8 @@ class main_application_obj():
                 notWrking = notWrking+1
             else:
                 onWorking = onWorking + 1
-        offLine = notWrking+onWorking
+        #offLine = notWrking+onWorking
+        offLine = 0
         print(x)
         print(y)
         print(labe)
@@ -736,7 +863,8 @@ class main_application_obj():
 
         self.all_ui.label_online.setText(str((onWorking+notWrking)))
         self.all_ui.label_offline.setText(str(offLine))
-        self.all_ui.label_workingtime.setText(str(5.4))
+        runTime = 83.2+(time.time() - self.startTime)/3600
+        self.all_ui.label_workingtime.setText(str(round(runTime, 4)))
         self.all_ui.label_damage.setText(str(damageNum))
         self.all_ui.label_onworking.setText(str(onWorking))
         self.all_ui.label_notworking.setText(str(notWrking))

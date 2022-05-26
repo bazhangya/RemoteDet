@@ -100,7 +100,7 @@ QListWidget::item{
      </spacer>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,75,40,10,35,70,5">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,75,5,100,5,70,5">
       <item>
        <spacer name="horizontalSpacer_5">
         <property name="orientation">
@@ -130,7 +130,7 @@ QListWidget::item{
          </spacer>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="114,100">
+         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="100,100">
           <item>
            <widget class="QLabel" name="label_online">
             <property name="layoutDirection">
@@ -182,7 +182,7 @@ QListWidget::item{
          </spacer>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="114,100">
+         <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="100,100">
           <item>
            <widget class="QLabel" name="label_damage">
             <property name="styleSheet">
@@ -230,7 +230,7 @@ QListWidget::item{
          </spacer>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="114,100">
+         <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="100,100">
           <item>
            <widget class="QLabel" name="label_workingtime">
             <property name="styleSheet">
@@ -309,7 +309,7 @@ QListWidget::item{
        </spacer>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,50,1">
         <item>
          <spacer name="verticalSpacer_6">
           <property name="orientation">
@@ -324,6 +324,9 @@ QListWidget::item{
          </spacer>
         </item>
         <item>
+         <layout class="QVBoxLayout" name="verticalLayout_map"/>
+        </item>
+        <item>
          <spacer name="verticalSpacer_7">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -335,77 +338,6 @@ QListWidget::item{
            </size>
           </property>
          </spacer>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QPushButton" name="pushButton_update">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>50</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>幼圆</family>
-              <pointsize>15</pointsize>
-              <weight>50</weight>
-              <italic>false</italic>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
-	border-image:transparent;
-}</string>
-            </property>
-            <property name="text">
-             <string>更新</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_cancel">
-            <property name="minimumSize">
-             <size>
-              <width>80</width>
-              <height>50</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>幼圆</family>
-              <pointsize>15</pointsize>
-              <weight>50</weight>
-              <italic>false</italic>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
-	border-image:transparent;
-}</string>
-            </property>
-            <property name="text">
-             <string>退出</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
         </item>
        </layout>
       </item>

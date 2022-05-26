@@ -85,11 +85,30 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer_2)
+
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.lineEdit_passwd = QLineEdit(Form)
         self.lineEdit_passwd.setObjectName(u"lineEdit_passwd")
         self.lineEdit_passwd.setMinimumSize(QSize(50, 30))
+        font = QFont()
+        font.setFamily(u"\u5e7c\u5706")
+        font.setPointSize(10)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.lineEdit_passwd.setFont(font)
+        self.lineEdit_passwd.setStyleSheet(u"QLineEdit{\n"
+"	background:transparent;\n"
+"	border-image:transparent;\n"
+"	color:rgb(255,255,255);\n"
+"	font: 10pt \"\u5e7c\u5706\";\n"
+"\n"
+"\n"
+"}")
         self.lineEdit_passwd.setEchoMode(QLineEdit.Password)
 
         self.horizontalLayout_2.addWidget(self.lineEdit_passwd)
@@ -130,9 +149,10 @@ class Ui_Form(object):
         self.verticalLayout.setStretch(0, 108)
         self.verticalLayout.setStretch(1, 5)
         self.verticalLayout.setStretch(2, 5)
-        self.verticalLayout.setStretch(3, 1)
-        self.verticalLayout.setStretch(4, 15)
-        self.verticalLayout.setStretch(5, 110)
+        self.verticalLayout.setStretch(3, 5)
+        self.verticalLayout.setStretch(4, 5)
+        self.verticalLayout.setStretch(5, 15)
+        self.verticalLayout.setStretch(6, 110)
 
         self.horizontalLayout.addLayout(self.verticalLayout)
 
@@ -156,6 +176,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"\u767b\u5f55", None))
         self.lineEdit_id.setText(QCoreApplication.translate("Form", u"admin", None))
+        self.lineEdit_passwd.setText(QCoreApplication.translate("Form", u"admin", None))
         self.pushButton_sign.setText(QCoreApplication.translate("Form", u"\u767b\u5f55", None))
         self.pushButton_quit.setText(QCoreApplication.translate("Form", u"\u9000\u51fa", None))
     # retranslateUi
